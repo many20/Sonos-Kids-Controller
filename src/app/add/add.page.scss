@@ -33,7 +33,7 @@ ion-item {
     bottom: 0;
     right: 0;
     z-index: 9999;
-    background-color: rgba(220, 220, 220, 1.0);
+    background-color: rgba(220, 220, 220, 1);
 }
 
 // Onscreen Keyboard
@@ -88,7 +88,7 @@ ion-item {
 }
 
 .simple-keyboard.hg-theme-ios.hg-theme-default {
-    background-color: rgba(220, 220, 220, 1.0);
+    background-color: rgba(220, 220, 220, 1);
     padding: 5px;
     border-radius: 5px;
 }
@@ -148,4 +148,17 @@ ion-item {
 .simple-keyboard.hg-theme-ios.hg-theme-default .hg-button-back {
     min-width: 80px;
     max-width: 80px;
+}
+
+@media (max-width: 768px), (max-height: 450px) {
+    ion-toolbar {
+        ion-back-button {
+            --min-height: 50px;
+            --min-width: 120px;
+        }
+        ion-button {
+            height: 50px !important;
+            width: 70px !important;
+        }
+    }
 }

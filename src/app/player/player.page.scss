@@ -45,3 +45,16 @@ ion-button {
 .volume-button {
     --background: #262626;
 }
+
+@media (max-width: 768px), (max-height: 450px) {
+    ion-back-button {
+        --min-height: 50px;
+        --min-width: 120px;
+    }
+
+    .cover-card {
+        margin-top: 0;
+        width: auto;
+        height: auto;
+    }
+}

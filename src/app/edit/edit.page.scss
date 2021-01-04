@@ -48,3 +48,16 @@ p {
 .larger {
     font-size: 20px;
 }
+
+@media (max-width: 768px), (max-height: 450px) {
+    ion-toolbar {
+        ion-back-button {
+            --min-height: 50px;
+            --min-width: 120px;
+        }
+        ion-button {
+            height: 50px !important;
+            width: 70px !important;
+        }
+    }
+}

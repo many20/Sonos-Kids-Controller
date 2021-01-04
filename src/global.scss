@@ -9,25 +9,24 @@
  * https://ionicframework.com/docs/layout/global-stylesheets
  */
 
-
 /* Core CSS required for Ionic components to work properly */
 
-@import "~@ionic/angular/css/core.css";
+@import '~@ionic/angular/css/core.css';
 
 /* Basic CSS for apps built with Ionic */
 
-@import "~@ionic/angular/css/normalize.css";
-@import "~@ionic/angular/css/structure.css";
-@import "~@ionic/angular/css/typography.css";
+@import '~@ionic/angular/css/normalize.css';
+@import '~@ionic/angular/css/structure.css';
+@import '~@ionic/angular/css/typography.css';
 @import '~@ionic/angular/css/display.css';
 
 /* Optional CSS utils that can be commented out */
 
-@import "~@ionic/angular/css/padding.css";
-@import "~@ionic/angular/css/float-elements.css";
-@import "~@ionic/angular/css/text-alignment.css";
-@import "~@ionic/angular/css/text-transformation.css";
-@import "~@ionic/angular/css/flex-utils.css";
+@import '~@ionic/angular/css/padding.css';
+@import '~@ionic/angular/css/float-elements.css';
+@import '~@ionic/angular/css/text-alignment.css';
+@import '~@ionic/angular/css/text-transformation.css';
+@import '~@ionic/angular/css/flex-utils.css';
 
 /* no text selection in firefox */
 
@@ -73,4 +72,20 @@ ion-toolbar {
 
 .alert-message {
     font-size: 18px !important;
+}
+
+ion-slides {
+    overflow: hidden;
+    height: 100%;
+}
+
+ion-grid {
+    overflow: hidden;
+    height: 100%;
+}
+
+@media (max-width: 768px), (max-height: 450px) {
+    ion-toolbar {
+        --min-height: 50px;
+    }
 }
