@@ -30,7 +30,7 @@ export class HomePage implements OnInit {
     freeModeSticky: true,
     freeModeMomentumBounce: false,
     freeModeMomentumRatio: 1.0,
-    freeModeMomentumVelocityRatio: 1.0
+    freeModeMomentumVelocityRatio: 1.0,
   };
 
   constructor(
@@ -38,7 +38,7 @@ export class HomePage implements OnInit {
     private artworkService: ArtworkService,
     private playerService: PlayerService,
     private activityIndicatorService: ActivityIndicatorService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -72,8 +72,8 @@ export class HomePage implements OnInit {
     setTimeout(() => {
       const navigationExtras: NavigationExtras = {
         state: {
-          artist: clickedArtist
-        }
+          artist: clickedArtist,
+        },
       };
       this.router.navigate(['/medialist'], navigationExtras);
     }, 50);
@@ -95,12 +95,23 @@ export class HomePage implements OnInit {
     this.slider.slideNext();
   }
 
+  loadPlayState(id: string = 'default') {
+    if (!this.playerService.getSavedPlayState(id)) return;
+
+    const navigationExtras: NavigationExtras = {
+      state: {
+        loadSavedPlayStateId: id,
+      },
+    };
+    this.router.navigate(['/player'], navigationExtras);
+  }
+
   editButtonPressed() {
     window.clearTimeout(this.editClickTimer);
 
     if (this.editButtonclickCount < 9) {
       this.editButtonclickCount++;
-      
+
       this.editClickTimer = window.setTimeout(() => {
         this.editButtonclickCount = 0;
       }, 500);
