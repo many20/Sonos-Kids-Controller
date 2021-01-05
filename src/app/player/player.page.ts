@@ -11,20 +11,21 @@ import { Media } from '../media';
   styleUrls: ['./player.page.scss'],
 })
 export class PlayerPage implements OnInit {
-
-  media: Media;
+  media?: Media;
   cover = '';
   playing = true;
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private artworkService: ArtworkService,
-    private playerService: PlayerService
-  ) {
+  loadSavedPlayStateId?: string;
+
+  constructor(private route: ActivatedRoute, private router: Router, private artworkService: ArtworkService, private playerService: PlayerService) {
     this.route.queryParams.subscribe(params => {
       if (this.router.getCurrentNavigation().extras.state) {
         this.media = this.router.getCurrentNavigation().extras.state.media;
+        this.loadSavedPlayStateId = this.router.getCurrentNavigation().extras.state.loadSavedPlayStateId;
+
+        if (this.loadSavedPlayStateId && !this.media) {
+          this.media = this.playerService.getSavedPlayState(this.loadSavedPlayStateId)?.media;
+        }
       }
     });
   }
@@ -36,7 +37,9 @@ export class PlayerPage implements OnInit {
   }
 
   ionViewWillEnter() {
-    if (this.media) {
+    if (this.loadSavedPlayStateId) {
+      this.playerService.loadPlayState(this.loadSavedPlayStateId);
+    } else if (this.media) {
       this.playerService.playMedia(this.media);
     }
   }
@@ -69,5 +72,9 @@ export class PlayerPage implements OnInit {
       this.playing = true;
       this.playerService.sendCmd(PlayerCmds.PLAY);
     }
+  }
+
+  savePlayState(id: string = 'default') {
+    this.playerService.savePlayState(id);
   }
 }
