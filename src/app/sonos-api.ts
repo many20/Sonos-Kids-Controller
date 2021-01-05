@@ -21,10 +21,10 @@ export interface SonosApiState {
   elapsedTime: number;
   elapsedTimeFormatted: string;
   zoneState: string;
-  playerState: string;
-  zonePlayMode: {
+  playerState: string | 'PLAYING' | 'PAUSED_PLAYBACK';
+  playMode: {
     shuffle: boolean;
-    repeat: boolean;
+    repeat: 'none' | 'all' | 'one';
     crossfade: boolean;
   };
   equalizer: {

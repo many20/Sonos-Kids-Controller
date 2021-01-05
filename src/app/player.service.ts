@@ -14,6 +14,7 @@ export enum PlayerCmds {
   NEXT = 'next',
   VOLUMEUP = 'volume/+5',
   VOLUMEDOWN = 'volume/-5',
+  CLEARQUEUE = 'clearqueue'
 }
 
 export interface SaveState {
@@ -30,7 +31,6 @@ export class PlayerService {
   private config: Observable<SonosApiConfig> = null;
 
   private currentPlayingMedia: Media | undefined;
-  //private saveState: Record<string, SaveState> = {};
 
   constructor(private http: HttpClient) {}
 
@@ -39,8 +39,6 @@ export class PlayerService {
     if (!saveStateString) return;
     const saveState: Record<string, SaveState> = JSON.parse(saveStateString);
     return saveState[id];
-
-    //return this.saveState[id];
   }
 
   setSavedPlayState(state: SaveState) {
@@ -49,8 +47,6 @@ export class PlayerService {
     if (saveStateString) saveState = JSON.parse(saveStateString);
     saveState[state.id] = state;
     window.localStorage.setItem('SavedPlayState', JSON.stringify(saveState));
-
-    //this.saveState[state.id] = state;
   }
 
   getConfig() {
@@ -73,16 +69,24 @@ export class PlayerService {
     this.sendRequest('state', onComplete);
   }
 
+  getQueue(onComplete?: (data: SonosApiState) => void) {
+    this.sendRequest('queue', onComplete);
+  }
+
   sendCmd(cmd: PlayerCmds, onComplete?: (data: any) => void) {
     this.sendRequest(cmd, onComplete);
   }
 
-  sendTrackseekCmd(trackseek: number, onComplete?: (data: any) => void) {
-    this.sendRequest('trackseek/' + trackseek, onComplete);
+  sendTrackseekCmd(trackNumber: number, onComplete?: (data: any) => void) {
+    this.sendRequest('trackseek/' + trackNumber, onComplete);
   }
 
-  sendTimeseekCmd(timeseek: number, onComplete?: (data: any) => void) {
-    this.sendRequest('timeseek /' + timeseek, onComplete);
+  sendTimeseekCmd(seconds: number, onComplete?: (data: any) => void) {
+    this.sendRequest('timeseek/' + seconds, onComplete);
+  }
+
+  sendSleepCmd(seconds: number, onComplete?: (data: any) => void) {
+    this.sendRequest('sleep/' + seconds, onComplete);
   }
 
   playMedia(media: Media, onComplete?: (data: any) => void) {
@@ -116,7 +120,8 @@ export class PlayerService {
     }
 
     this.currentPlayingMedia = media;
-    this.sendRequest(url, onComplete);
+
+    this.sendCmd(PlayerCmds.CLEARQUEUE, () => this.sendRequest(url, onComplete));
   }
 
   say(text: string) {
