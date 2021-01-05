@@ -16,6 +16,13 @@ export enum PlayerCmds {
   VOLUMEDOWN = 'volume/-5',
 }
 
+export interface SaveState {
+  id: string;
+  media: Media;
+  trackNo: number;
+  elapsedTime: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -23,12 +30,27 @@ export class PlayerService {
   private config: Observable<SonosApiConfig> = null;
 
   private currentPlayingMedia: Media | undefined;
-  private saveState: Record<string, { media: Media; trackNo: number; elapsedTime: number }> = {};
+  //private saveState: Record<string, SaveState> = {};
 
   constructor(private http: HttpClient) {}
 
-  getSavedPlayState(id: string = 'default') {
-    return this.saveState[id];
+  getSavedPlayState(id: string = 'default'): SaveState | undefined {
+    const saveStateString = window.localStorage.getItem('SavedPlayState');
+    if (!saveStateString) return;
+    const saveState: Record<string, SaveState> = JSON.parse(saveStateString);
+    return saveState[id];
+
+    //return this.saveState[id];
+  }
+
+  setSavedPlayState(state: SaveState) {
+    let saveState: Record<string, SaveState> = {};
+    let saveStateString = window.localStorage.getItem('SavedPlayState');
+    if (saveStateString) saveState = JSON.parse(saveStateString);
+    saveState[state.id] = state;
+    window.localStorage.setItem('SavedPlayState', JSON.stringify(saveState));
+
+    //this.saveState[state.id] = state;
   }
 
   getConfig() {
@@ -105,25 +127,27 @@ export class PlayerService {
   savePlayState(id: string = 'default') {
     if (!this.currentPlayingMedia) return;
 
-    this.saveState[id] = {
+    this.setSavedPlayState({
+      id,
       media: this.currentPlayingMedia,
       trackNo: 1,
       elapsedTime: 0,
-    };
+    });
 
     this.getState(state => {
-      this.saveState[id] = {
+      this.setSavedPlayState({
+        id,
         media: this.currentPlayingMedia,
         trackNo: state.trackNo,
         elapsedTime: state.elapsedTime,
-      };
+      });
     });
   }
 
   loadPlayState(id: string = 'default') {
-    const savedData = this.saveState[id];
+    const state = this.getSavedPlayState(id);
 
-    this.playMedia(savedData.media, () => this.sendTrackseekCmd(savedData.trackNo, () => this.sendTimeseekCmd(savedData.elapsedTime)));
+    this.playMedia(state.media, () => this.sendTrackseekCmd(state.trackNo, () => this.sendTimeseekCmd(state.elapsedTime)));
   }
 
   private sendRequest(url: string, onComplete: (data: any) => void = () => undefined) {
