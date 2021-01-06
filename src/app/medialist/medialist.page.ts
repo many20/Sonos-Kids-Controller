@@ -62,11 +62,11 @@ export class MedialistPage implements OnInit {
   }
 
   coverClicked(clickedMedia: Media) {
-    this.playerService.isAirPlayPlaying((isAirPlayPlaying) => {
+    this.playerService.isExternControlled((isExternControlled) => {
       const navigationExtras: NavigationExtras = {
         state: {
           media: clickedMedia,
-          isAirPlayPlaying,
+          isExternControlled,
         }
       };
       this.router.navigate(['/player'], navigationExtras);
