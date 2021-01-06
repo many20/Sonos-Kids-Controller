@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Media } from './media';
-import { SonosApiConfig, SonosApiState } from './sonos-api';
+import { SonosApiConfig, SonosApiState, SonosApiQueue } from './sonos-api';
 import { environment } from '../environments/environment';
 import { Observable } from 'rxjs';
 import { publishReplay, refCount } from 'rxjs/operators';
@@ -65,15 +65,29 @@ export class PlayerService {
     return this.config;
   }
 
-  getState(onComplete?: (data: SonosApiState) => void) {
+  getState(onComplete?: (state: SonosApiState) => void) {
     this.sendRequest('state', onComplete);
   }
 
-  getQueue(onComplete?: (data: SonosApiState) => void) {
-    this.sendRequest('queue', onComplete);
+  getQueue({ limit, offset, detailed }: { limit?: number; offset?: number; detailed?: boolean; } = {}, onComplete?: (queue: SonosApiQueue[]) => void) {
+    let cmd = 'queue';
+    if (limit) cmd = cmd + '/' + limit;
+    if (limit && offset) cmd = cmd + '/' + offset;
+    if (detailed) cmd = cmd + '/detailed';
+    
+    this.sendRequest(cmd, onComplete);
   }
 
-  sendCmd(cmd: PlayerCmds, onComplete?: (data: any) => void) {
+  // if you are using AirPlay and not the desired album is played rather Airplay plays the next titel, so better do nothing. 
+  // I have not found a way to stop Airplay, but if Airplay is used state.nextTrack is undefined, atherwise it is an emoty string, and we can us this to detect Airplay playing.
+  isAirPlayPlaying(onComplete?: (isAirPlayPlaying: boolean) => void) {
+    this.getState((state) => {
+      if (state.nextTrack.title === undefined) onComplete(true);
+      else onComplete(false);
+    })
+  }
+
+  sendCmd(cmd: PlayerCmds, onComplete?: (data?: any) => void) {
     this.sendRequest(cmd, onComplete);
   }
 
@@ -121,6 +135,7 @@ export class PlayerService {
 
     this.currentPlayingMedia = media;
 
+    // sending command adds the album to the queue, but then the trackNr is not correct, so clear the queue first
     this.sendCmd(PlayerCmds.CLEARQUEUE, () => this.sendRequest(url, onComplete));
   }
 
@@ -151,7 +166,6 @@ export class PlayerService {
 
   loadPlayState(id: string = 'default') {
     const state = this.getSavedPlayState(id);
-
     this.playMedia(state.media, () => this.sendTrackseekCmd(state.trackNo, () => this.sendTimeseekCmd(state.elapsedTime)));
   }
 

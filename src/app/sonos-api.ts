@@ -21,10 +21,10 @@ export interface SonosApiState {
   elapsedTime: number;
   elapsedTimeFormatted: string;
   zoneState: string;
-  playerState: string | 'PLAYING' | 'PAUSED_PLAYBACK';
+  playerState: string | "PLAYING" | "PAUSED_PLAYBACK";
   playMode: {
     shuffle: boolean;
-    repeat: 'none' | 'all' | 'one';
+    repeat: "none" | "all" | "one";
     crossfade: boolean;
   };
   equalizer: {
@@ -32,4 +32,12 @@ export interface SonosApiState {
     treble: number;
     loudness: boolean;
   };
+}
+
+export interface SonosApiQueue {
+  uri?: string;
+  albumArtURI: string;
+  title: string;
+  artist: string;
+  album: string;
 }
