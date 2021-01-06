@@ -11,41 +11,50 @@ import { Media } from '../media';
   styleUrls: ['./player.page.scss'],
 })
 export class PlayerPage implements OnInit {
-  media?: Media;
+  media: Media = { type: ''};
   cover = '';
   playing = true;
 
   loadSavedPlayStateId?: string;
+  isAirPlayPlaying: boolean = false;
 
   constructor(private route: ActivatedRoute, private router: Router, private artworkService: ArtworkService, private playerService: PlayerService) {
     this.route.queryParams.subscribe(params => {
-      if (this.router.getCurrentNavigation().extras.state) {
-        this.media = this.router.getCurrentNavigation().extras.state.media;
-        this.loadSavedPlayStateId = this.router.getCurrentNavigation().extras.state.loadSavedPlayStateId;
-
-        if (this.loadSavedPlayStateId && !this.media) {
-          this.media = this.playerService.getSavedPlayState(this.loadSavedPlayStateId)?.media;
-        }
+      const state = this.router.getCurrentNavigation().extras.state;
+      if (state) {
+        if (state.isAirPlayPlaying === true) {
+          this.isAirPlayPlaying = true;
+          this.media = { title: 'Airplay playing', type: 'airplay'}
+        } else {
+          this.media = state.media;
+          this.loadSavedPlayStateId = state.loadSavedPlayStateId;
+          
+          if (this.loadSavedPlayStateId && !this.media && !this.isAirPlayPlaying) {
+            this.media = this.playerService.getSavedPlayState(this.loadSavedPlayStateId)?.media;
+          }
+        }   
       }
     });
   }
 
   ngOnInit() {
-    this.artworkService.getArtwork(this.media).subscribe(url => {
+    if (!this.isAirPlayPlaying) this.artworkService.getArtwork(this.media).subscribe(url => {
       this.cover = url;
     });
   }
 
   ionViewWillEnter() {
-    if (this.loadSavedPlayStateId) {
-      this.playerService.loadPlayState(this.loadSavedPlayStateId);
-    } else if (this.media) {
-      this.playerService.playMedia(this.media);
+    if (!this.isAirPlayPlaying) {
+      if (this.loadSavedPlayStateId) {
+        this.playerService.loadPlayState(this.loadSavedPlayStateId);
+      } else if (this.media) {
+        this.playerService.playMedia(this.media);
+      }
     }
   }
 
   ionViewWillLeave() {
-    this.playerService.sendCmd(PlayerCmds.PAUSE);
+    if (!this.isAirPlayPlaying) this.playerService.sendCmd(PlayerCmds.PAUSE);
   }
 
   volUp() {

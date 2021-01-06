@@ -98,12 +98,15 @@ export class HomePage implements OnInit {
   loadPlayState(id: string = 'default') {
     if (!this.playerService.getSavedPlayState(id)) return;
 
-    const navigationExtras: NavigationExtras = {
-      state: {
-        loadSavedPlayStateId: id,
-      },
-    };
-    this.router.navigate(['/player'], navigationExtras);
+    this.playerService.isAirPlayPlaying((isAirPlayPlaying) => {
+      const navigationExtras: NavigationExtras = {
+        state: {
+          loadSavedPlayStateId: id,
+          isAirPlayPlaying,
+        },
+      };
+      this.router.navigate(['/player'], navigationExtras);
+    });
   }
 
   editButtonPressed() {

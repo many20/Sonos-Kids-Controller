@@ -62,12 +62,15 @@ export class MedialistPage implements OnInit {
   }
 
   coverClicked(clickedMedia: Media) {
-    const navigationExtras: NavigationExtras = {
-      state: {
-        media: clickedMedia
-      }
-    };
-    this.router.navigate(['/player'], navigationExtras);
+    this.playerService.isAirPlayPlaying((isAirPlayPlaying) => {
+      const navigationExtras: NavigationExtras = {
+        state: {
+          media: clickedMedia,
+          isAirPlayPlaying,
+        }
+      };
+      this.router.navigate(['/player'], navigationExtras);
+    });
   }
 
   mediaNameClicked(clickedMedia: Media) {
