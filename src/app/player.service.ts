@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Media } from './media';
-import { SonosApiConfig, SonosApiState } from './sonos-api';
+import { SonosApiConfig, SonosApiState, SonosApiQueue } from './sonos-api';
 import { environment } from '../environments/environment';
 import { Observable } from 'rxjs';
 import { publishReplay, refCount } from 'rxjs/operators';
@@ -14,6 +14,7 @@ export enum PlayerCmds {
   NEXT = 'next',
   VOLUMEUP = 'volume/+5',
   VOLUMEDOWN = 'volume/-5',
+  CLEARQUEUE = 'clearqueue'
 }
 
 export interface SaveState {
@@ -30,7 +31,6 @@ export class PlayerService {
   private config: Observable<SonosApiConfig> = null;
 
   private currentPlayingMedia: Media | undefined;
-  //private saveState: Record<string, SaveState> = {};
 
   constructor(private http: HttpClient) {}
 
@@ -39,8 +39,6 @@ export class PlayerService {
     if (!saveStateString) return;
     const saveState: Record<string, SaveState> = JSON.parse(saveStateString);
     return saveState[id];
-
-    //return this.saveState[id];
   }
 
   setSavedPlayState(state: SaveState) {
@@ -49,8 +47,6 @@ export class PlayerService {
     if (saveStateString) saveState = JSON.parse(saveStateString);
     saveState[state.id] = state;
     window.localStorage.setItem('SavedPlayState', JSON.stringify(saveState));
-
-    //this.saveState[state.id] = state;
   }
 
   getConfig() {
@@ -69,20 +65,42 @@ export class PlayerService {
     return this.config;
   }
 
-  getState(onComplete?: (data: SonosApiState) => void) {
+  getState(onComplete?: (state: SonosApiState) => void) {
     this.sendRequest('state', onComplete);
   }
 
-  sendCmd(cmd: PlayerCmds, onComplete?: (data: any) => void) {
+  getQueue({ limit, offset, detailed }: { limit?: number; offset?: number; detailed?: boolean; } = {}, onComplete?: (queue: SonosApiQueue[]) => void) {
+    let cmd = 'queue';
+    if (limit) cmd = cmd + '/' + limit;
+    if (limit && offset) cmd = cmd + '/' + offset;
+    if (detailed) cmd = cmd + '/detailed';
+    
     this.sendRequest(cmd, onComplete);
   }
 
-  sendTrackseekCmd(trackseek: number, onComplete?: (data: any) => void) {
-    this.sendRequest('trackseek/' + trackseek, onComplete);
+  // if you are using AirPlay and not the desired album is played rather Airplay plays the next titel, so better do nothing. 
+  // I have not found a way to stop Airplay, but if Airplay is used state.nextTrack is undefined, atherwise it is an emoty string, and we can us this to detect Airplay playing.
+  isAirPlayPlaying(onComplete?: (isAirPlayPlaying: boolean) => void) {
+    this.getState((state) => {
+      if (state.nextTrack.title === undefined) onComplete(true);
+      else onComplete(false);
+    })
   }
 
-  sendTimeseekCmd(timeseek: number, onComplete?: (data: any) => void) {
-    this.sendRequest('timeseek /' + timeseek, onComplete);
+  sendCmd(cmd: PlayerCmds, onComplete?: (data?: any) => void) {
+    this.sendRequest(cmd, onComplete);
+  }
+
+  sendTrackseekCmd(trackNumber: number, onComplete?: (data: any) => void) {
+    this.sendRequest('trackseek/' + trackNumber, onComplete);
+  }
+
+  sendTimeseekCmd(seconds: number, onComplete?: (data: any) => void) {
+    this.sendRequest('timeseek/' + seconds, onComplete);
+  }
+
+  sendSleepCmd(seconds: number, onComplete?: (data: any) => void) {
+    this.sendRequest('sleep/' + seconds, onComplete);
   }
 
   playMedia(media: Media, onComplete?: (data: any) => void) {
@@ -116,7 +134,9 @@ export class PlayerService {
     }
 
     this.currentPlayingMedia = media;
-    this.sendRequest(url, onComplete);
+
+    // sending command adds the album to the queue, but then the trackNr is not correct, so clear the queue first
+    this.sendCmd(PlayerCmds.CLEARQUEUE, () => this.sendRequest(url, onComplete));
   }
 
   say(text: string) {
@@ -146,7 +166,6 @@ export class PlayerService {
 
   loadPlayState(id: string = 'default') {
     const state = this.getSavedPlayState(id);
-
     this.playMedia(state.media, () => this.sendTrackseekCmd(state.trackNo, () => this.sendTimeseekCmd(state.elapsedTime)));
   }
 
