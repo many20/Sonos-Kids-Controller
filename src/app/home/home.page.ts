@@ -98,11 +98,11 @@ export class HomePage implements OnInit {
   loadPlayState(id: string = 'default') {
     if (!this.playerService.getSavedPlayState(id)) return;
 
-    this.playerService.isAirPlayPlaying((isAirPlayPlaying) => {
+    this.playerService.isExternControlled((isExternControlled) => {
       const navigationExtras: NavigationExtras = {
         state: {
           loadSavedPlayStateId: id,
-          isAirPlayPlaying,
+          isExternControlled,
         },
       };
       this.router.navigate(['/player'], navigationExtras);

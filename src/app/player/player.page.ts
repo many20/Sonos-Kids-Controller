@@ -16,20 +16,20 @@ export class PlayerPage implements OnInit {
   playing = true;
 
   loadSavedPlayStateId?: string;
-  isAirPlayPlaying: boolean = false;
+  isExternControlled: boolean = false;
 
   constructor(private route: ActivatedRoute, private router: Router, private artworkService: ArtworkService, private playerService: PlayerService) {
     this.route.queryParams.subscribe(params => {
       const state = this.router.getCurrentNavigation().extras.state;
       if (state) {
-        if (state.isAirPlayPlaying === true) {
-          this.isAirPlayPlaying = true;
-          this.media = { title: 'Airplay playing', type: 'airplay'}
+        if (state.isExternControlled === true) {
+          this.isExternControlled = true;
+          this.media = { title: '', type: 'extern'}
         } else {
           this.media = state.media;
           this.loadSavedPlayStateId = state.loadSavedPlayStateId;
           
-          if (this.loadSavedPlayStateId && !this.media && !this.isAirPlayPlaying) {
+          if (this.loadSavedPlayStateId && !this.media && !this.isExternControlled) {
             this.media = this.playerService.getSavedPlayState(this.loadSavedPlayStateId)?.media;
           }
         }   
@@ -38,13 +38,13 @@ export class PlayerPage implements OnInit {
   }
 
   ngOnInit() {
-    if (!this.isAirPlayPlaying) this.artworkService.getArtwork(this.media).subscribe(url => {
+    if (!this.isExternControlled) this.artworkService.getArtwork(this.media).subscribe(url => {
       this.cover = url;
     });
   }
 
   ionViewWillEnter() {
-    if (!this.isAirPlayPlaying) {
+    if (!this.isExternControlled) {
       if (this.loadSavedPlayStateId) {
         this.playerService.loadPlayState(this.loadSavedPlayStateId);
       } else if (this.media) {
@@ -54,7 +54,7 @@ export class PlayerPage implements OnInit {
   }
 
   ionViewWillLeave() {
-    if (!this.isAirPlayPlaying) this.playerService.sendCmd(PlayerCmds.PAUSE);
+    if (!this.isExternControlled) this.playerService.sendCmd(PlayerCmds.PAUSE);
   }
 
   volUp() {

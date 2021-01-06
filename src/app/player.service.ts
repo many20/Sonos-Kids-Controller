@@ -80,7 +80,7 @@ export class PlayerService {
 
   // if you are using AirPlay and not the desired album is played rather Airplay plays the next titel, so better do nothing. 
   // I have not found a way to stop Airplay, but if Airplay is used state.nextTrack is undefined, atherwise it is an emoty string, and we can us this to detect Airplay playing.
-  isAirPlayPlaying(onComplete?: (isAirPlayPlaying: boolean) => void) {
+  isExternControlled(onComplete?: (isExternControlled: boolean) => void) {
     this.getState((state) => {
       if (state.nextTrack.title === undefined) onComplete(true);
       else onComplete(false);
