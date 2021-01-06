@@ -62,7 +62,7 @@ export class MedialistPage implements OnInit {
   }
 
   coverClicked(clickedMedia: Media) {
-    this.playerService.isExternControlled((isAiisExternControlledrPlayPlaying) => {
+    this.playerService.isExternControlled((isExternControlled) => {
       const navigationExtras: NavigationExtras = {
         state: {
           media: clickedMedia,
