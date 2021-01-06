@@ -11,7 +11,7 @@ import { Media } from '../media';
   styleUrls: ['./player.page.scss'],
 })
 export class PlayerPage implements OnInit {
-  media?: Media;
+  media: Media = { type: ''};
   cover = '';
   playing = true;
 
@@ -22,13 +22,17 @@ export class PlayerPage implements OnInit {
     this.route.queryParams.subscribe(params => {
       const state = this.router.getCurrentNavigation().extras.state;
       if (state) {
-        this.media = state.media;
-        this.loadSavedPlayStateId = state.loadSavedPlayStateId;
-        if (state.isAirPlayPlaying) this.isAirPlayPlaying = true;
-
-        if (this.loadSavedPlayStateId && !this.media) {
-          this.media = this.playerService.getSavedPlayState(this.loadSavedPlayStateId)?.media;
-        }
+        if (state.isAirPlayPlaying === true) {
+          this.isAirPlayPlaying = true;
+          this.media = { title: 'Airplay playing', type: 'airplay'}
+        } else {
+          this.media = state.media;
+          this.loadSavedPlayStateId = state.loadSavedPlayStateId;
+          
+          if (this.loadSavedPlayStateId && !this.media && !this.isAirPlayPlaying) {
+            this.media = this.playerService.getSavedPlayState(this.loadSavedPlayStateId)?.media;
+          }
+        }   
       }
     });
   }
