@@ -11,38 +11,46 @@ import { Media } from '../media';
   styleUrls: ['./player.page.scss'],
 })
 export class PlayerPage implements OnInit {
-
-  media: Media;
+  media?: Media;
   cover = '';
   playing = true;
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private artworkService: ArtworkService,
-    private playerService: PlayerService
-  ) {
+  loadSavedPlayStateId?: string;
+  isAirPlayPlaying: boolean = false;
+
+  constructor(private route: ActivatedRoute, private router: Router, private artworkService: ArtworkService, private playerService: PlayerService) {
     this.route.queryParams.subscribe(params => {
-      if (this.router.getCurrentNavigation().extras.state) {
-        this.media = this.router.getCurrentNavigation().extras.state.media;
+      const state = this.router.getCurrentNavigation().extras.state;
+      if (state) {
+        this.media = state.media;
+        this.loadSavedPlayStateId = state.loadSavedPlayStateId;
+        if (state.isAirPlayPlaying) this.isAirPlayPlaying = true;
+
+        if (this.loadSavedPlayStateId && !this.media) {
+          this.media = this.playerService.getSavedPlayState(this.loadSavedPlayStateId)?.media;
+        }
       }
     });
   }
 
   ngOnInit() {
-    this.artworkService.getArtwork(this.media).subscribe(url => {
+    if (!this.isAirPlayPlaying) this.artworkService.getArtwork(this.media).subscribe(url => {
       this.cover = url;
     });
   }
 
   ionViewWillEnter() {
-    if (this.media) {
-      this.playerService.playMedia(this.media);
+    if (!this.isAirPlayPlaying) {
+      if (this.loadSavedPlayStateId) {
+        this.playerService.loadPlayState(this.loadSavedPlayStateId);
+      } else if (this.media) {
+        this.playerService.playMedia(this.media);
+      }
     }
   }
 
   ionViewWillLeave() {
-    this.playerService.sendCmd(PlayerCmds.PAUSE);
+    if (!this.isAirPlayPlaying) this.playerService.sendCmd(PlayerCmds.PAUSE);
   }
 
   volUp() {
@@ -69,5 +77,9 @@ export class PlayerPage implements OnInit {
       this.playing = true;
       this.playerService.sendCmd(PlayerCmds.PLAY);
     }
+  }
+
+  savePlayState(id: string = 'default') {
+    this.playerService.savePlayState(id);
   }
 }
