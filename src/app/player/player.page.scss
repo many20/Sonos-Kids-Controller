@@ -57,13 +57,13 @@ ion-button {
 @media (max-width: 768px), (max-height: 450px) {
     ion-back-button {
         --min-height: 50px;
-        --min-width: 120px;
+        --min-width: 100px;
     }
 
     ion-toolbar {
         ion-button {
             height: 50px !important;
-            width: 70px !important;
+            width: 50px !important;
         }
     }
 
