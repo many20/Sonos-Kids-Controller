@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Media } from './media';
 import { SonosApiConfig, SonosApiState, SonosApiQueue } from './sonos-api';
 import { environment } from '../environments/environment';
-import { Observable } from 'rxjs';
-import { publishReplay, refCount } from 'rxjs/operators';
+import { Observable, throwError  } from 'rxjs';
+import { publishReplay, refCount, retry, catchError } from 'rxjs/operators';
 
 export enum PlayerCmds {
   PLAY = 'play',
@@ -56,9 +56,10 @@ export class PlayerService {
     if (!this.config) {
       const url = environment.production ? '../api/sonos' : 'http://localhost:8200/api/sonos';
 
-      this.config = this.http.get<SonosApiConfig>(url).pipe(
+      this.config = this.http.get<SonosApiConfig>(url).pipe(     
         publishReplay(1), // cache result
         refCount(),
+        catchError(this.handleError),
       );
     }
 
@@ -172,7 +173,27 @@ export class PlayerService {
   private sendRequest(url: string, onComplete: (data: any) => void = () => undefined) {
     this.getConfig().subscribe(config => {
       const baseUrl = 'http://' + config.server + ':' + config.port + '/' + config.rooms[0] + '/';
-      this.http.get(baseUrl + url).subscribe(onComplete);
+      this.http.get(baseUrl + url).pipe(
+        retry(1),
+        catchError(this.handleError)
+      ).subscribe(onComplete);
     });
   }
+  
+  private handleError(error) {
+    let errorMessage = '';
+ 
+    if (error.error instanceof ErrorEvent) {
+      // client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // server-side error
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+ 
+    console.error(errorMessage);
+ 
+    return throwError(errorMessage);
+  } 
+  
 }

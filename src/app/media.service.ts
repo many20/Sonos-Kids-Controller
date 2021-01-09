@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, from, of, iif, Subject } from 'rxjs';
-import { map, mergeMap, tap, toArray, mergeAll } from 'rxjs/operators';
+import { Observable, from, of, iif, Subject, throwError } from 'rxjs';
+import { map, mergeMap, tap, toArray, mergeAll, catchError } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { SpotifyService } from './spotify.service';
 import { Media } from './media';
@@ -32,7 +32,7 @@ export class MediaService {
 
   updateRawMedia() {
     const url = (environment.production) ? '../api/data' : 'http://localhost:8200/api/data';
-    this.http.get<Media[]>(url).subscribe(media => {
+    this.http.get<Media[]>(url).pipe(catchError(this.handleError)).subscribe(media => {
         this.rawMediaSubject.next(media);
     });
   }
@@ -68,7 +68,7 @@ export class MediaService {
   updateMedia() {
     const url = (environment.production) ? '../api/data' : 'http://localhost:8200/api/data';
 
-    this.http.get<Media[]>(url).pipe(
+    this.http.get<Media[]>(url).pipe(   
       mergeMap(items => from(items)), // parallel calls for each item
       map((item) => // check if current item is a single album or a query for multiple items
         iif(
@@ -88,7 +88,8 @@ export class MediaService {
       ),
       mergeMap(items => from(items)), // seperate arrays to single observables
       mergeAll(), // merge everything together
-      toArray() // convert to array
+      toArray(), // convert to array
+      catchError(this.handleError)
     ).subscribe(media => {
       this.media = media;
       this.mediaSubject.next(media);
@@ -154,5 +155,21 @@ export class MediaService {
           }));
       })
     );
+  }
+
+  private handleError(error) {
+    let errorMessage = '';
+ 
+    if (error.error instanceof ErrorEvent) {
+      // client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // server-side error
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+ 
+    console.error(errorMessage);
+ 
+    return throwError(errorMessage);
   }
 }
