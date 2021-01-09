@@ -15,7 +15,8 @@ ion-card {
     height: 240px;
     border-radius: 120px;
     border: 6px solid var(--ion-color-dark);
-    margin-top: 18px;
+    //margin-top: 18px;
+    margin-top: calc(50vh - 200px);
 }
 
 .title-card {
@@ -53,9 +54,9 @@ ion-card {
     }
 
     .circle-card {
-        width: auto;
-        height: calc(100% - 4px);
-        margin-top: 0;
+        //width: auto;
+        //height: calc(100% - 4px);
+        margin-top: calc(50vh - 185px);
     }
 
     .title-card {
