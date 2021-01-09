@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, defer, throwError, of, range } from 'rxjs';
-import { retryWhen, flatMap, tap, delay, take, map, mergeMap, mergeAll, toArray } from 'rxjs/operators';
+import { retryWhen, flatMap, tap, delay, take, map, mergeMap, mergeAll, toArray, catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { SpotifyAlbumsResponse } from './spotify';
@@ -94,9 +94,25 @@ export class SpotifyService {
   refreshToken() {
     const tokenUrl = (environment.production) ? '../api/token' : 'http://localhost:8200/api/token';
 
-    this.http.get(tokenUrl, {responseType: 'text'}).subscribe(token => {
+    this.http.get(tokenUrl, {responseType: 'text'}).pipe(catchError(this.handleError)).subscribe(token => {
       this.spotifyApi.setAccessToken(token);
       this.refreshingToken = false;
     });
+  }
+
+  private handleError(error) {
+    let errorMessage = '';
+ 
+    if (error.error instanceof ErrorEvent) {
+      // client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // server-side error
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+ 
+    console.error(errorMessage);
+ 
+    return throwError(errorMessage);
   }
 }
