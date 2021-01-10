@@ -13,7 +13,8 @@ ion-toolbar {
 }
 
 .cover-card {
-    margin-top: 20px;
+    //margin-top: 20px;
+    margin-top: calc((100vh - 350px - 70px - 20px) /2);
     width: 350px;
     height: 350px;
     margin-left: auto !important;
@@ -21,7 +22,8 @@ ion-toolbar {
 }
 
 .play-controls {
-    margin-top: 90px;
+    //margin-top: 90px;
+    margin-top: calc((50vh - 150px));
 }
 
 .indicator-button {
@@ -57,19 +59,20 @@ ion-button {
 @media (max-width: 768px), (max-height: 450px) {
     ion-back-button {
         --min-height: 50px;
-        --min-width: 120px;
+        --min-width: 100px;
     }
 
     ion-toolbar {
         ion-button {
             height: 50px !important;
-            width: 70px !important;
+            width: 50px !important;
         }
     }
 
     .cover-card {
         margin-top: 0;
         width: auto;
-        height: auto;
+        // height: auto;
+        height: calc(100vh - 70px);
     }
 }

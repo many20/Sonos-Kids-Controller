@@ -6,7 +6,11 @@ ion-back-button {
 
 ion-card {
     width: 230px;
-    margin: 0 auto !important;
+    // margin: 0 auto !important;
+    margin-top: calc(50vh - 200px);
+    margin-bottom: 0;
+    margin-left: auto !important;
+    margin-right: auto !important;
     --background: #262626;
 }
 
@@ -14,10 +18,10 @@ ion-card-title {
     padding-bottom: 5px;
 }
 
-ion-row.media-card {
-    padding-top: 35px;
-    padding-bottom: 42px;
-}
+// ion-row.media-card {
+//     padding-top: 35px;
+//     padding-bottom: 42px;
+// }
 
 .truncate-text {
     overflow: hidden;
@@ -38,11 +42,12 @@ ion-row.media-card {
 @media (max-width: 768px), (max-height: 450px) {
     ion-back-button {
         --min-height: 50px;
-        --min-width: 120px;
+        --min-width: 100px;
     }
 
     ion-card {
         width: auto;
+        margin-top: calc(50vh - 176px);
     }
 
     ion-card-header {
@@ -56,8 +61,8 @@ ion-row.media-card {
         padding-bottom: 0;
     }
 
-    ion-row.media-card {
-        padding-top: 0;
-        padding-bottom: 0;
-    }
+    // ion-row.media-card {
+    //     padding-top: 0;
+    //     padding-bottom: 0;
+    // }
 }
