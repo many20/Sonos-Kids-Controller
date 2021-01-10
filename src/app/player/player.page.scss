@@ -2,6 +2,7 @@ ion-back-button {
     --min-height: 70px;
     --min-width: 120px;
     --icon-font-size: 30px;
+    width: 70px;
 }
 
 ion-toolbar {
@@ -60,6 +61,7 @@ ion-button {
     ion-back-button {
         --min-height: 50px;
         --min-width: 100px;
+        width: 50px;
     }
 
     ion-toolbar {

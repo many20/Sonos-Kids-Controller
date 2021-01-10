@@ -2,6 +2,7 @@ ion-back-button {
     --min-height: 70px;
     --min-width: 120px;
     --icon-font-size: 30px;
+    width: 70px;
 }
 
 ion-card {
@@ -43,6 +44,7 @@ ion-card-title {
     ion-back-button {
         --min-height: 50px;
         --min-width: 100px;
+        width: 50px;
     }
 
     ion-card {
