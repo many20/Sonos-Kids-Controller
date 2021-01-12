@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, from, of, iif, Subject } from 'rxjs';
-import { map, mergeMap, tap, toArray, mergeAll } from 'rxjs/operators';
+import { map, mergeMap, tap, toArray, mergeAll, take } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { SpotifyService } from './spotify.service';
 import { Media } from './media';
@@ -162,6 +162,7 @@ export class MediaService {
         return media
           .filter(currentMedia => currentMedia.uuid === uuid)[0];
       }),
+      take(1)
     );
   }
 

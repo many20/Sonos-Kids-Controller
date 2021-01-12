@@ -44,6 +44,8 @@ export class AppComponent {
       this.playerService.isExternControlled((isExternControlled) => {
         this.mediaService.getMediaFromUuid(this.uuid).subscribe(media => {
           if (media) {
+            this.uuid = '';
+
             const navigationExtras: NavigationExtras = {
               state: {
                 media: media,
