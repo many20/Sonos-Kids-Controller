@@ -79,7 +79,7 @@ export class MediaService {
                 items.forEach(currentItem => {
                   currentItem.artist = item.artist;
                 });
-              } 
+              }
               return items;
             })
           ),
@@ -155,4 +155,14 @@ export class MediaService {
       })
     );
   }
+
+  getMediaFromUuid(uuid: string): Observable<Media | undefined> {
+    return this.getMediaObservable().pipe(
+      map((media: Media[]) => {
+        return media
+          .filter(currentMedia => currentMedia.uuid === uuid)[0];
+      }),
+    );
+  }
+
 }
