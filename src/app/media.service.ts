@@ -68,7 +68,7 @@ export class MediaService {
   updateMedia() {
     const url = (environment.production) ? '../api/data' : 'http://localhost:8200/api/data';
 
-    this.http.get<Media[]>(url).pipe(
+    this.http.get<Media[]>(url).pipe(   
       mergeMap(items => from(items)), // parallel calls for each item
       map((item) => // check if current item is a single album or a query for multiple items
         iif(
@@ -79,7 +79,7 @@ export class MediaService {
                 items.forEach(currentItem => {
                   currentItem.artist = item.artist;
                 });
-              }
+              } 
               return items;
             })
           ),
@@ -109,6 +109,11 @@ export class MediaService {
   getArtists(): Observable<Artist[]> {
     return this.getMediaObservable().pipe(
       map((media: Media[]) => {
+        media = media.sort((a, b) => a.title.localeCompare(b.title, undefined, {
+          numeric: true,
+          sensitivity: 'base'
+        }));
+
         // Create temporary object with artists as keys and albumCounts as values
         const mediaCounts = media.reduce((tempCounts, currentMedia) => {
           tempCounts[currentMedia.artist] = (tempCounts[currentMedia.artist] || 0) + 1;
@@ -159,7 +164,7 @@ export class MediaService {
 
   private handleError(error) {
     let errorMessage = '';
-
+ 
     if (error.error instanceof ErrorEvent) {
       // client-side error
       errorMessage = `Error: ${error.error.message}`;
@@ -167,9 +172,9 @@ export class MediaService {
       // server-side error
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
-
+ 
     console.error(errorMessage);
-
+ 
     return throwError(errorMessage);
   }
 }
