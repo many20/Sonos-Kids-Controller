@@ -109,6 +109,11 @@ export class MediaService {
   getArtists(): Observable<Artist[]> {
     return this.getMediaObservable().pipe(
       map((media: Media[]) => {
+        media = media.sort((a, b) => a.title.localeCompare(b.title, undefined, {
+          numeric: true,
+          sensitivity: 'base'
+        }));
+
         // Create temporary object with artists as keys and albumCounts as values
         const mediaCounts = media.reduce((tempCounts, currentMedia) => {
           tempCounts[currentMedia.artist] = (tempCounts[currentMedia.artist] || 0) + 1;
@@ -116,13 +121,13 @@ export class MediaService {
         }, {});
 
         // Create temporary object with artists as keys and covers (first media cover) as values
-        const covers = media.sort((a, b) => a.title <= b.title ? -1 : 1).reduce((tempCovers, currentMedia) => {
+        const covers = media.reduce((tempCovers, currentMedia) => {
             if (!tempCovers[currentMedia.artist]) { tempCovers[currentMedia.artist] = currentMedia.cover; }
             return tempCovers;
         }, {});
 
         // Create temporary object with artists as keys and first media as values
-        const coverMedia = media.sort((a, b) => a.title <= b.title ? -1 : 1).reduce((tempMedia, currentMedia) => {
+        const coverMedia = media.reduce((tempMedia, currentMedia) => {
           if (!tempMedia[currentMedia.artist]) { tempMedia[currentMedia.artist] = currentMedia; }
           return tempMedia;
       }, {});
