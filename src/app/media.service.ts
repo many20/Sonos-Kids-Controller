@@ -68,7 +68,7 @@ export class MediaService {
   updateMedia() {
     const url = (environment.production) ? '../api/data' : 'http://localhost:8200/api/data';
 
-    this.http.get<Media[]>(url).pipe(
+    this.http.get<Media[]>(url).pipe(   
       mergeMap(items => from(items)), // parallel calls for each item
       map((item) => // check if current item is a single album or a query for multiple items
         iif(
@@ -79,7 +79,7 @@ export class MediaService {
                 items.forEach(currentItem => {
                   currentItem.artist = item.artist;
                 });
-              }
+              } 
               return items;
             })
           ),
@@ -116,13 +116,13 @@ export class MediaService {
         }, {});
 
         // Create temporary object with artists as keys and covers (first media cover) as values
-        const covers = media.reduce((tempCovers, currentMedia) => {
+        const covers = media.sort((a, b) => a.title <= b.title ? -1 : 1).reduce((tempCovers, currentMedia) => {
             if (!tempCovers[currentMedia.artist]) { tempCovers[currentMedia.artist] = currentMedia.cover; }
             return tempCovers;
         }, {});
 
         // Create temporary object with artists as keys and first media as values
-        const coverMedia = media.reduce((tempMedia, currentMedia) => {
+        const coverMedia = media.sort((a, b) => a.title <= b.title ? -1 : 1).reduce((tempMedia, currentMedia) => {
           if (!tempMedia[currentMedia.artist]) { tempMedia[currentMedia.artist] = currentMedia; }
           return tempMedia;
       }, {});
@@ -159,7 +159,7 @@ export class MediaService {
 
   private handleError(error) {
     let errorMessage = '';
-
+ 
     if (error.error instanceof ErrorEvent) {
       // client-side error
       errorMessage = `Error: ${error.error.message}`;
@@ -167,9 +167,9 @@ export class MediaService {
       // server-side error
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
-
+ 
     console.error(errorMessage);
-
+ 
     return throwError(errorMessage);
   }
 }
