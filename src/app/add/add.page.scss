@@ -150,7 +150,7 @@ ion-item {
     max-width: 80px;
 }
 
-@media (max-width: 768px), (max-height: 450px) {
+@media (max-width: 700px), (max-height: 440px) {
     ion-toolbar {
         ion-back-button {
             --min-height: 50px;
@@ -158,7 +158,7 @@ ion-item {
         }
         ion-button {
             height: 50px !important;
-            width: 70px !important;
+            width: 50px !important;
         }
     }
 }
