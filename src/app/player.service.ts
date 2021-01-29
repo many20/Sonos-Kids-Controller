@@ -137,7 +137,7 @@ export class PlayerService {
     this.currentPlayingMedia = media;
 
     // sending command adds the album to the queue, but then the trackNr is not correct, so clear the queue first
-    this.sendCmd(PlayerCmds.CLEARQUEUE, () => this.sendRequest(url, onComplete));
+    this.sendCmd(PlayerCmds.CLEARQUEUE, () => this.sendRequest(url, () => this.sendTrackseekCmd(1, onComplete)));
   }
 
   say(text: string) {

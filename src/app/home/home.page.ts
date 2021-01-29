@@ -69,21 +69,21 @@ export class HomePage implements OnInit {
     this.activityIndicatorService.show();
     this.activityIndicatorVisible = true;
 
-    setTimeout(() => {
-      const navigationExtras: NavigationExtras = {
-        state: {
-          artist: clickedArtist,
-        },
-      };
-      this.router.navigate(['/medialist'], navigationExtras);
-    }, 50);
+    //setTimeout(() => {
+    const navigationExtras: NavigationExtras = {
+      state: {
+        artist: clickedArtist,
+      },
+    };
+    this.router.navigate(['/medialist'], navigationExtras);
+    //}, 50);
   }
 
   artistNameClicked(clickedArtist: Artist) {
     this.playerService.getConfig().subscribe(config => {
-  	  if (config.tts == null || config.tts.enabled == true) {
-	      this.playerService.say(clickedArtist.name);
-	    }
+      if (config.tts == null || config.tts.enabled == true) {
+        this.playerService.say(clickedArtist.name);
+      }
     });
   }
 
@@ -102,7 +102,7 @@ export class HomePage implements OnInit {
   loadPlayState(id: string = 'default') {
     if (!this.playerService.getSavedPlayState(id)) return;
 
-    this.playerService.isExternControlled((isExternControlled) => {
+    this.playerService.isExternControlled(isExternControlled => {
       const navigationExtras: NavigationExtras = {
         state: {
           loadSavedPlayStateId: id,

@@ -1,4 +1,4 @@
-import { Component, HostListener  } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { Router, NavigationExtras } from '@angular/router';
 import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
@@ -13,7 +13,7 @@ export enum KEY_CODE {
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss']
+  styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
   private uuid: string = '';
@@ -24,7 +24,7 @@ export class AppComponent {
     private statusBar: StatusBar,
     private router: Router,
     private mediaService: MediaService,
-    private playerService: PlayerService
+    private playerService: PlayerService,
   ) {
     this.initializeApp();
   }
@@ -40,25 +40,28 @@ export class AppComponent {
   keyEvent(event: KeyboardEvent) {
     //console.log(event);
 
-    if (event.key === KEY_CODE.ENTER) {
-      this.playerService.isExternControlled((isExternControlled) => {
+    const tryNavigate = () => {
+      this.playerService.isExternControlled(isExternControlled => {
         this.mediaService.getMediaFromUuid(this.uuid).subscribe(media => {
+          this.uuid = '';
           if (media) {
-            this.uuid = '';
-
             const navigationExtras: NavigationExtras = {
               state: {
                 media: media,
                 isExternControlled,
-              }
+              },
             };
-            this.router.navigate(['/player'], navigationExtras);
+            this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => this.router.navigate(['/player'], navigationExtras));
           }
-        })
+        });
         this.mediaService.publishCachedMedia();
       });
+    };
+
+    if (event.key === KEY_CODE.ENTER) {
+      tryNavigate();
     } else {
-      switch(event.key) {
+      switch (event.key) {
         case '0':
         case '1':
         case '2':
@@ -76,7 +79,9 @@ export class AppComponent {
           break;
       }
 
+      if (this.uuid.length >= 10) {
+        tryNavigate();
+      }
     }
-
   }
 }
