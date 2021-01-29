@@ -11,7 +11,7 @@ import { Media } from '../media';
   styleUrls: ['./player.page.scss'],
 })
 export class PlayerPage implements OnInit {
-  media: Media = { type: ''};
+  media: Media = { type: '' };
   cover = '';
   playing = true;
 
@@ -24,23 +24,24 @@ export class PlayerPage implements OnInit {
       if (state) {
         if (state.isExternControlled === true) {
           this.isExternControlled = true;
-          this.media = { title: '', type: 'extern'}
+          this.media = { title: '', type: 'extern' };
         } else {
           this.media = state.media;
           this.loadSavedPlayStateId = state.loadSavedPlayStateId;
-          
+
           if (this.loadSavedPlayStateId && !this.media && !this.isExternControlled) {
             this.media = this.playerService.getSavedPlayState(this.loadSavedPlayStateId)?.media;
           }
-        }   
+        }
       }
     });
   }
 
   ngOnInit() {
-    if (!this.isExternControlled) this.artworkService.getArtwork(this.media).subscribe(url => {
-      this.cover = url;
-    });
+    if (!this.isExternControlled)
+      this.artworkService.getArtwork(this.media).subscribe(url => {
+        this.cover = url;
+      });
   }
 
   ionViewWillEnter() {

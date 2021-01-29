@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Media } from './media';
 import { SonosApiConfig, SonosApiState, SonosApiQueue } from './sonos-api';
 import { environment } from '../environments/environment';
-import { Observable, throwError  } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { publishReplay, refCount, retry, catchError } from 'rxjs/operators';
 
 export enum PlayerCmds {
@@ -14,7 +14,7 @@ export enum PlayerCmds {
   NEXT = 'next',
   VOLUMEUP = 'volume/+5',
   VOLUMEDOWN = 'volume/-5',
-  CLEARQUEUE = 'clearqueue'
+  CLEARQUEUE = 'clearqueue',
 }
 
 export interface SaveState {
@@ -56,7 +56,7 @@ export class PlayerService {
     if (!this.config) {
       const url = environment.production ? '../api/sonos' : 'http://localhost:8200/api/sonos';
 
-      this.config = this.http.get<SonosApiConfig>(url).pipe(     
+      this.config = this.http.get<SonosApiConfig>(url).pipe(
         publishReplay(1), // cache result
         refCount(),
         catchError(this.handleError),
@@ -70,22 +70,22 @@ export class PlayerService {
     this.sendRequest('state', onComplete);
   }
 
-  getQueue({ limit, offset, detailed }: { limit?: number; offset?: number; detailed?: boolean; } = {}, onComplete?: (queue: SonosApiQueue[]) => void) {
+  getQueue({ limit, offset, detailed }: { limit?: number; offset?: number; detailed?: boolean } = {}, onComplete?: (queue: SonosApiQueue[]) => void) {
     let cmd = 'queue';
     if (limit) cmd = cmd + '/' + limit;
     if (limit && offset) cmd = cmd + '/' + offset;
     if (detailed) cmd = cmd + '/detailed';
-    
+
     this.sendRequest(cmd, onComplete);
   }
 
-  // if you are using AirPlay and not the desired album is played rather Airplay plays the next titel, so better do nothing. 
+  // if you are using AirPlay and not the desired album is played rather Airplay plays the next titel, so better do nothing.
   // I have not found a way to stop Airplay, but if Airplay is used state.nextTrack is undefined, atherwise it is an emoty string, and we can us this to detect Airplay playing.
   isExternControlled(onComplete?: (isExternControlled: boolean) => void) {
-    this.getState((state) => {
+    this.getState(state => {
       if (state.nextTrack.title === undefined) onComplete(true);
       else onComplete(false);
-    })
+    });
   }
 
   sendCmd(cmd: PlayerCmds, onComplete?: (data?: any) => void) {
@@ -141,8 +141,15 @@ export class PlayerService {
   }
 
   say(text: string) {
-    const url = 'say/' + encodeURIComponent(text) + '/de-de';
-    this.sendRequest(url);
+    this.getConfig().subscribe(config => {
+      let url = 'say/' + encodeURIComponent(text) + '/' + (config.tts?.language?.length > 0 ? config.tts.language : 'de-de');
+
+      if (config.tts?.volume?.length > 0) {
+        url += '/' + config.tts.volume;
+      }
+
+      this.sendRequest(url);
+    });
   }
 
   savePlayState(id: string = 'default') {
@@ -173,16 +180,16 @@ export class PlayerService {
   private sendRequest(url: string, onComplete: (data: any) => void = () => undefined) {
     this.getConfig().subscribe(config => {
       const baseUrl = 'http://' + config.server + ':' + config.port + '/' + config.rooms[0] + '/';
-      this.http.get(baseUrl + url).pipe(
-        retry(1),
-        catchError(this.handleError)
-      ).subscribe(onComplete);
+      this.http
+        .get(baseUrl + url)
+        .pipe(retry(1), catchError(this.handleError))
+        .subscribe(onComplete);
     });
   }
-  
+
   private handleError(error) {
     let errorMessage = '';
- 
+
     if (error.error instanceof ErrorEvent) {
       // client-side error
       errorMessage = `Error: ${error.error.message}`;
@@ -190,10 +197,9 @@ export class PlayerService {
       // server-side error
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
- 
+
     console.error(errorMessage);
- 
+
     return throwError(errorMessage);
-  } 
-  
+  }
 }

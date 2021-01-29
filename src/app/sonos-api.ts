@@ -2,6 +2,11 @@ export interface SonosApiConfig {
   server: string;
   port: string;
   rooms: string[];
+  tts?: {
+    enabled?: boolean;
+    language?: string;
+    volume?: string;
+  };
 }
 
 export interface SonosApiTrack {
@@ -21,10 +26,10 @@ export interface SonosApiState {
   elapsedTime: number;
   elapsedTimeFormatted: string;
   zoneState: string;
-  playerState: string | "PLAYING" | "PAUSED_PLAYBACK";
+  playerState: string | 'PLAYING' | 'PAUSED_PLAYBACK';
   playMode: {
     shuffle: boolean;
-    repeat: "none" | "all" | "one";
+    repeat: 'none' | 'all' | 'one';
     crossfade: boolean;
   };
   equalizer: {
